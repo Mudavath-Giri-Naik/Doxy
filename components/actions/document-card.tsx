@@ -4,6 +4,8 @@ import Link from "next/link";
 
 import { ExternalLink, FileText } from "lucide-react";
 
+import { DocumentActions } from "@/components/actions/document-actions";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -68,12 +70,17 @@ export function DocumentCard({
               </Link>
             </CardTitle>
           </div>
-          <Link
-            href={`/editor/${documentId}`}
-            className="text-muted-foreground hover:text-primary shrink-0 opacity-0 transition-all group-hover:opacity-100"
-          >
-            <ExternalLink className="h-4 w-4" />
-          </Link>
+          <div className="flex items-center gap-1">
+            <Link
+              href={`/editor/${documentId}`}
+              className="text-muted-foreground hover:text-primary shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Link>
+            <div className="opacity-0 transition-opacity group-hover:opacity-100">
+              <DocumentActions documentId={documentId} />
+            </div>
+          </div>
         </div>
 
         {/* User Info and Timestamp */}

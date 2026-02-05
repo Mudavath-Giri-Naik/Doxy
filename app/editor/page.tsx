@@ -25,14 +25,23 @@ export default async function EditorPage({ searchParams }: EditorPageProps) {
     redirect("/auth/login");
   }
 
-  // Fetch documents owned by user with owner data
-  const { data: documents, error: docsError } = await supabase.rpc(
-    "get_my_documents_with_users",
-  );
+  // Fetch documents owned by user directly to ensure they show up even if account missing
+  const { data: rawDocuments, error: docsError } = await supabase
+    .from("documents")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("updated_at", { ascending: false });
 
   if (docsError) {
     console.error("Failed to load documents:", docsError);
   }
+
+  const documents = rawDocuments?.map((doc) => ({
+    ...doc,
+    user_name: user.user_metadata.name || user.email,
+    user_email: user.email,
+    user_picture_url: user.user_metadata.avatar_url,
+  }));
 
   // Fetch starred documents with owner data
   const { data: starredDocuments, error: starredError } = await supabase.rpc(
@@ -52,14 +61,23 @@ export default async function EditorPage({ searchParams }: EditorPageProps) {
     console.error("Failed to load shared documents:", sharedError);
   }
 
-  // Fetch trashed documents with owner data
-  const { data: trashedDocuments, error: trashedError } = await supabase.rpc(
-    "get_trashed_documents_with_users",
-  );
+  // Fetch trashed documents directly
+  const { data: rawTrashedDocuments, error: trashedError } = await supabase
+    .from("trashed_documents")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("trashed_at", { ascending: false });
 
   if (trashedError) {
     console.error("Failed to load trashed documents:", trashedError);
   }
+
+  const trashedDocuments = rawTrashedDocuments?.map((doc) => ({
+    ...doc,
+    user_name: user.user_metadata.name || user.email,
+    user_email: user.email,
+    user_picture_url: user.user_metadata.avatar_url,
+  }));
 
   // Determine which sections to show based on the query parameter
   const showRecent = section === "recent";
